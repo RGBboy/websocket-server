@@ -11,13 +11,13 @@
   "scripts": {
     "test": "elm-test src/WebSocketServerTest.elm"
   },
+  "dependencies": {
+    "uuid": "^3.0.1",
+    "ws": "^2.2.2"
+  },
   "devDependencies": {
     "elm": "^0.18.0",
     "elm-test": "^0.18.2"
   },
-  "license": "BSD-3-Clause",
-  "dependencies": {
-    "uuid": "^3.0.1",
-    "ws": "^2.2.2"
-  }
+  "license": "BSD-3-Clause"
 }
