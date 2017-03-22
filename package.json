@@ -1,0 +1,23 @@
+{
+  "name": "websocket-server",
+  "version": "1.0.0",
+  "description": "Web Socket Server in Elm and Node.js",
+  "author": "RGBboy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RGBboy/websocket-server.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "elm-test src/WebSocketServerTest.elm"
+  },
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-test": "^0.18.2"
+  },
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "uuid": "^3.0.1",
+    "ws": "^2.2.2"
+  }
+}
