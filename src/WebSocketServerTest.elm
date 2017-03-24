@@ -98,13 +98,8 @@ type Msg
 config =
   { onConnection = Connection
   , onDisconnection = Disconnection
-  , onMessage = decodeMessage
+  , onMessage = Message
   }
-
-decodeMessage : Socket -> Location -> Decoder Msg
-decodeMessage socket location =
-  Decode.string
-    |> Decode.map (Message socket location)
 
 expectDecode : Decoder a -> String -> (a -> Expect.Expectation) -> Expect.Expectation
 expectDecode decoder input expectation =
@@ -144,11 +139,11 @@ tests =
       [ test "sendToOne" <|
         \() ->
           let
-            actual = Encode.encode 2 (sendToOne identity (Encode.string "Test") "a")
+            actual = Encode.encode 2 (sendToOne identity "Test" "a")
             expected = """{
   "type": "Message",
   "id": "a",
-  "data": "Test"
+  "message": "Test"
 }"""
           in
             Expect.equal actual expected
@@ -157,17 +152,17 @@ tests =
       [ test "sendToMany" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToMany identity (Encode.string "Test") ["a", "b"])
+            actual = List.map (Encode.encode 2) (sendToMany identity "Test" ["a", "b"])
             expected =
               ["""{
   "type": "Message",
   "id": "a",
-  "data": "Test"
+  "message": "Test"
 }"""
               , """{
   "type": "Message",
   "id": "b",
-  "data": "Test"
+  "message": "Test"
 }"""
               ]
           in
@@ -177,17 +172,17 @@ tests =
       [ test "sendToOthers" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToOthers identity (Encode.string "Test") "a" ["a", "b", "c"])
+            actual = List.map (Encode.encode 2) (sendToOthers identity "Test" "a" ["a", "b", "c"])
             expected =
               ["""{
   "type": "Message",
   "id": "b",
-  "data": "Test"
+  "message": "Test"
 }"""
               , """{
   "type": "Message",
   "id": "c",
-  "data": "Test"
+  "message": "Test"
 }"""
               ]
           in

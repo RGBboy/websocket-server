@@ -8,16 +8,9 @@ module WebSocketServer exposing
   , eventDecoder
   )
 
-{-| Web sockets make it cheaper to talk to your servers.
-Connecting to a server takes some time, so with web sockets, you make that
-connection once and then keep using. The major benefits of this are:
-  1. It faster to send messages. No need to do a bunch of work for every single
-  message.
-  2. The server can push messages to you. With normal HTTP you would have to
-  keep *asking* for changes, but a web socket, the server can talk to you
-  whenever it wants. This means there is less unnecessary network traffic.
-The API here attempts to cover the typical usage scenarios, but if you need
-many unique connections to the same endpoint, you need a different library.
+{-| Web socket server enables you to write the server part of your application
+in Elm too.
+
 # Web Socket Server
 @docs Socket, Location, eventDecoder
 # Commands
@@ -50,9 +43,9 @@ type alias Location = Navigation.Location
 
     You would write something like this to create a cmd to send a message:
 
-    sendToOne outputPort (Encode.string "Hello!") socketA
+    sendToOne outputPort "Hello!" socketA
 -}
-sendToOne : (Encode.Value -> a) -> Encode.Value -> Socket -> a
+sendToOne : (Encode.Value -> a) -> String -> Socket -> a
 sendToOne outputPort = curry (encodeMessage >> outputPort)
 
 {-| Send a message to a many sockets. Given you have an output port:
@@ -61,10 +54,10 @@ sendToOne outputPort = curry (encodeMessage >> outputPort)
 
     You would write something like this to create a cmd to send messages:
 
-    sendToMany outputPort (Encode.string "Hello!") [socketA, socketB]
+    sendToMany outputPort "Hello!" [socketA, socketB]
       |> Cmd.batch
 -}
-sendToMany : (Encode.Value -> a) -> Encode.Value -> List Socket -> List a
+sendToMany : (Encode.Value -> a) -> String -> List Socket -> List a
 sendToMany outputPort message sockets =
   List.map (sendToOne outputPort message) sockets
 
@@ -74,10 +67,10 @@ sendToMany outputPort message sockets =
 
     You would write something like this to create a cmd to send messages:
 
-    sendToOthers outputPort (Encode.string "Hello!") socketA [socketA, socketB, socketC]
+    sendToOthers outputPort "Hello!" socketA [socketA, socketB, socketC]
       |> Cmd.batch
 -}
-sendToOthers : (Encode.Value -> a) -> Encode.Value -> Socket -> List Socket -> List a
+sendToOthers : (Encode.Value -> a) -> String -> Socket -> List Socket -> List a
 sendToOthers outputPort message socket sockets =
   let
     others = List.filter ((/=) socket) sockets
@@ -106,12 +99,12 @@ encodeClose socket =
     , ("id", Encode.string socket)
     ]
 
-encodeMessage : (Encode.Value, Socket) -> Encode.Value
+encodeMessage : (String, Socket) -> Encode.Value
 encodeMessage (message, socket) =
   Encode.object
     [ ("type", Encode.string "Message")
     , ("id", Encode.string socket)
-    , ("data", message)
+    , ("message", Encode.string message)
     ]
 
 
@@ -133,7 +126,7 @@ segregate connections into groups or associating a private id.
 Triggered when a disconnection happens. Can be used to clean up the connection
 from anywhere it has been saved in your application state.
 
-    onMessage : Socket -> Location -> Decoder msg
+    onMessage : Socket -> Location -> String -> msg
 
 Triggered when a socket recieves a message.
 
@@ -145,7 +138,7 @@ Triggered when a socket recieves a message.
 eventDecoder
   : { onConnection : Socket -> Location -> msg
     , onDisconnection: Socket -> Location -> msg
-    , onMessage: Socket -> Location -> Decoder msg
+    , onMessage: Socket -> Location -> String -> msg
     }
   -> Decoder msg
 eventDecoder config =
@@ -155,7 +148,7 @@ eventDecoder config =
 msgTypeDecoder
   : { onConnection : Socket -> Location -> msg
     , onDisconnection: Socket -> Location -> msg
-    , onMessage: Socket -> Location -> Decoder msg
+    , onMessage: Socket -> Location -> String -> msg
     }
   -> String
   -> Decoder msg
@@ -173,7 +166,7 @@ msgTypeDecoder config kind =
       decode config.onMessage
         |> required "id" Decode.string
         |> required "location" decodeLocation
-        |> Decode.andThen (Decode.field "message")
+        |> required "message" Decode.string
     _ -> Decode.fail ("Could not decode msg of type " ++ kind)
 
 decodeLocation : Decoder Location

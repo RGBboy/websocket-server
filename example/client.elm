@@ -45,7 +45,6 @@ type Msg
   = InputMessage String
   | SubmitMessage
   | ServerMessage String
-  | Noop
 
 update : Msg -> Model -> (Model, Cmd msg)
 update message model =
@@ -56,7 +55,7 @@ update message model =
       )
     SubmitMessage ->
       ( { model | input = "" }
-      , WebSocket.send model.server (Encode.encode 2 (Encode.string model.input))
+      , WebSocket.send model.server model.input
       )
     ServerMessage message ->
       ( { model
@@ -64,24 +63,14 @@ update message model =
         }
       , Cmd.none
       )
-    Noop -> (model, Cmd.none)
 
 
 
 -- SUBSCRIPTIONS
 
-decoder : Decoder Msg
-decoder =
-  Decode.map ServerMessage Decode.string
-
-decodeMessage : String -> Msg
-decodeMessage message =
-  Decode.decodeString decoder message
-    |> Result.withDefault Noop
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen model.server decodeMessage
+  WebSocket.listen model.server ServerMessage
 
 
 

@@ -45,7 +45,7 @@ update message model =
       )
     Message message ->
       ( model
-      , WSS.sendToMany outputPort (Encode.string message) model
+      , WSS.sendToMany outputPort message model
           |> Cmd.batch
       )
     Noop -> (model, Cmd.none)
@@ -58,7 +58,7 @@ decodeMsg value =
     decoder = WSS.eventDecoder
       { onConnection = (\socket _ -> Connection socket)
       , onDisconnection = (\socket _ -> Disconnection socket)
-      , onMessage = (\_ _ -> Decode.map Message Decode.string)
+      , onMessage = (\_ _ message -> Message message)
       }
   in
     Decode.decodeValue decoder value
