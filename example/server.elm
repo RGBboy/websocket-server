@@ -1,28 +1,3 @@
-# WebSocket Server
-
-Web Socket Server in Elm and Node.js
-
-## Installation
-
-To install the elm part of this library run:
-
-```
-elm package install RGBboy/websocket-server
-```
-
-To install the node part of this library run:
-
-```
-npm install websocket-server
-```
-
-## Usage
-
-See the example folder for a working version.
-
-### Elm
-
-```elm
 port module Server exposing (..)
 
 import Platform exposing (Program)
@@ -91,33 +66,3 @@ decodeMsg value =
 
 subscriptions : Model -> Sub Msg
 subscriptions model = inputPort decodeMsg
-
-```
-
-### Node
-
-The node API for this is quite simple:
-
-```javascript
-var port = (process.env.PORT || 8080),
-    server = require('http').createServer(),
-    WebSocketServer = require('websocket-server'),
-    app = require('../my-elm-server.js').Main.worker(),
-    wss = new WebSocketServer(
-      server,
-      app.ports.inputPort,
-      app.ports.outputPort
-    );
-
-server.listen(port);
-
-console.log(`Listening on :${port}`);
-```
-
-## Development
-
-Run `npm install` then `elm package install`.
-
-## Tests
-
-Run `npm t`.

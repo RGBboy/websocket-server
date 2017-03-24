@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Socket Server Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>html { width:100%; height: 100%; }</style>
+</head>
+<body>
+  <div id="mount"></div>
+  <script src="client.js"></script>
+  <script>
+    Elm.Client.embed(
+      document.getElementById('mount'),
+      window.location.href.replace('http', 'ws')
+    );
+  </script>
+</body>
+</html>

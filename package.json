@@ -9,6 +9,10 @@
   },
   "main": "index.js",
   "scripts": {
+    "start:example": "node ./example",
+    "build:example:server": "elm-make ./example/Server.elm --output ./example/server.js",
+    "build:example:client": "elm-make ./example/Client.elm --output ./example/client.js",
+    "build:example": "npm run build:example:client && npm run build:example:server",
     "test": "elm-test src/WebSocketServerTest.elm"
   },
   "dependencies": {
@@ -16,6 +20,7 @@
     "ws": "^2.2.2"
   },
   "devDependencies": {
+    "ecstatic": "^2.1.0",
     "elm": "^0.18.0",
     "elm-test": "^0.18.2"
   },
