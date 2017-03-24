@@ -6,7 +6,7 @@ import Expect
 import String
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Navigation exposing (Location)
+import Navigation
 
 import WebSocketServer exposing (..)
 
@@ -21,7 +21,7 @@ port emit : ( String, Encode.Value ) -> Cmd msg
 
 
 location : Location
-location = (Location "ws://localhost:8080/123" "localhost:8080" "localhost" "ws:" "ws://localhost:8080" "8080" "/123" "" "" "" "")
+location = (Navigation.Location "ws://localhost:8080/123" "localhost:8080" "localhost" "ws:" "ws://localhost:8080" "8080" "/123" "" "" "" "")
 
 connectionJSON : String
 connectionJSON = """
@@ -95,7 +95,6 @@ type Msg
   | Disconnection Socket Location
   | Message Socket Location String
 
-config : Config Msg
 config =
   { onConnection = Connection
   , onDisconnection = Disconnection
