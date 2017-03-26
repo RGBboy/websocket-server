@@ -30,7 +30,7 @@ npm run start:example
 
 Then go to localhost:8080 in multiple browser windows.
 
-### Elm
+### Example Elm Server Program
 
 ```elm
 port module Server exposing (..)
@@ -103,7 +103,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model = inputPort decodeMsg
 ```
 
-### Node
+### Example Usage in Node.js
 
 The node API for this is quite simple:
 
@@ -111,7 +111,7 @@ The node API for this is quite simple:
 var port = (process.env.PORT || 8080),
     server = require('http').createServer(),
     WebSocketServer = require('websocket-server'),
-    app = require('../my-elm-server.js').Main.worker(),
+    app = require('./my-elm-server.js').Main.worker(),
     wss = new WebSocketServer(
       server,
       app.ports.inputPort,
