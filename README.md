@@ -20,6 +20,16 @@ npm install websocket-server
 
 See the example folder for a working version.
 
+To get this working run:
+
+```
+npm install
+npm run build:example
+npm run start:example
+```
+
+Then go to localhost:8080 in multiple browser windows.
+
 ### Elm
 
 ```elm
