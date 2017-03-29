@@ -110,7 +110,7 @@ The node API for this is quite simple:
 ```javascript
 var port = (process.env.PORT || 8080),
     server = require('http').createServer(),
-    WebSocketServer = require('websocket-server'),
+    WebSocketServer = require('elm-websocket-server'),
     app = require('./my-elm-server.js').Main.worker(),
     wss = new WebSocketServer(
       server,
