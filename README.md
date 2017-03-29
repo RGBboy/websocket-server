@@ -13,7 +13,7 @@ elm package install RGBboy/websocket-server
 To install the node part of this library run:
 
 ```
-npm install websocket-server
+npm install elm-websocket-server
 ```
 
 ## Usage

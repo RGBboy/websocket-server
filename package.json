@@ -1,5 +1,5 @@
 {
-  "name": "websocket-server",
+  "name": "elm-websocket-server",
   "version": "1.0.0",
   "description": "Web Socket Server in Elm and Node.js",
   "author": "RGBboy",
