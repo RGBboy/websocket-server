@@ -15,6 +15,10 @@
     "build:example": "npm run build:example:client && npm run build:example:server",
     "test": "elm-test src/WebSocketServerTest.elm"
   },
+  "files": [
+    "index.js",
+    "lib/WebSocketServer.js"
+  ],
   "dependencies": {
     "uuid": "^3.0.1",
     "ws": "^2.2.2"
