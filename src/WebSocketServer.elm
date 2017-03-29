@@ -8,8 +8,8 @@ module WebSocketServer exposing
   , eventDecoder
   )
 
-{-| Web socket server enables you to write the server part of your application
-in Elm too.
+{-| Web socket server enables you to write the server part of your websocket
+application in Elm.
 
 # Web Socket Server
 @docs Socket, Location, eventDecoder
@@ -25,11 +25,13 @@ import Navigation
 
 
 {-| A pointer to the socket in the node.js world. These are based on uuids and
-    are unique to each connection that is created.
+are unique to each connection that is created.
 -}
 type alias Socket = String
 
-{-| The same Location type as found in elm-lang/navigation
+{-| The same Location type as found in [`elm-lang/navigation`][navigation].
+
+[navigation]: https://github.com/elm-lang/navigation
 -}
 type alias Location = Navigation.Location
 
@@ -41,7 +43,7 @@ type alias Location = Navigation.Location
 
     port outputPort : Encode.Value -> Cmd msg
 
-    You would write something like this to create a cmd to send a message:
+You would write something like this to create a cmd to send a message:
 
     sendToOne outputPort "Hello!" socketA
 -}
@@ -52,7 +54,7 @@ sendToOne outputPort = curry (encodeMessage >> outputPort)
 
     port outputPort : Encode.Value -> Cmd msg
 
-    You would write something like this to create a cmd to send messages:
+You would write something like this to create a cmd to send messages:
 
     sendToMany outputPort "Hello!" [socketA, socketB]
       |> Cmd.batch
@@ -65,7 +67,7 @@ sendToMany outputPort message sockets =
 
     port outputPort : Encode.Value -> Cmd msg
 
-    You would write something like this to create a cmd to send messages:
+You would write something like this to create a cmd to send messages:
 
     sendToOthers outputPort "Hello!" socketA [socketA, socketB, socketC]
       |> Cmd.batch
@@ -81,7 +83,7 @@ sendToOthers outputPort message socket sockets =
 
     port outputPort : Encode.Value -> Cmd msg
 
-    You would write something like this to create a cmd to close a socket:
+You would write something like this to create a cmd to close a socket:
 
     close outputPort socketA
 -}
@@ -132,6 +134,7 @@ Triggered when a socket recieves a message.
 
 **Note 1:** Almost everyone will want to use a URL parsing library like
 [`evancz/url-parser`][parse] to turn a `Location` into something more useful.
+
 [parse]: https://github.com/evancz/url-parser
 
 -}
