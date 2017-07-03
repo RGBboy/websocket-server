@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "summary": "Web Socket Server in Elm and Node.js",
     "repository": "https://github.com/RGBboy/websocket-server.git",
     "license": "BSD-3-Clause",
