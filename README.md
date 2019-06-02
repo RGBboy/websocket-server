@@ -23,6 +23,7 @@ See the example folder for a working version.
 To get this working run:
 
 ```
+cd example
 npm install
 npm run build:example
 npm run start:example
@@ -111,7 +112,7 @@ The node API for this is quite simple:
 var port = (process.env.PORT || 8080),
     server = require('http').createServer(),
     WebSocketServer = require('elm-websocket-server'),
-    app = require('./my-elm-server.js').Main.worker(),
+    app = require('./my-elm-server.js').Elm.Server.init(),
     wss = new WebSocketServer(
       server,
       app.ports.inputPort,
@@ -125,8 +126,8 @@ console.log(`Listening on :${port}`);
 
 ## Development
 
-Run `npm install` then `elm package install`.
+Run `npm install -g elm@0.19.0` then `elm make`.
 
 ## Tests
 
-Run `npm t`.
+Run `npm install -g elm-test@0.19.01` then `elm-test`.

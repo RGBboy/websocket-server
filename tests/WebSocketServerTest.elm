@@ -1,9 +1,9 @@
-module WebSocketServerTest exposing (..)
+module WebSocketServerTest exposing (Msg(..), config, connectionJSON, disconnectionJSON, expectDecode, location, messageJSON, tests)
 
 import Expect
+import Flip exposing (flip)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Navigation
 import String
 import Test exposing (Test, describe, test)
 import WebSocketServer exposing (..)
@@ -11,7 +11,7 @@ import WebSocketServer exposing (..)
 
 location : Location
 location =
-    Navigation.Location "ws://localhost:8080/123" "localhost:8080" "localhost" "ws:" "ws://localhost:8080" "8080" "/123" "" "" "" ""
+    Location "ws://localhost:8080/123" "localhost:8080" "localhost" "ws:" "ws://localhost:8080" "8080" "/123" "" "" "" ""
 
 
 connectionJSON : String
