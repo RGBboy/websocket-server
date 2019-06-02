@@ -31,6 +31,7 @@ type alias Model =
     , server : String
     , error : Maybe String
     , state : State
+    , isLoaded : Bool
     }
 
 
@@ -41,8 +42,9 @@ init server =
       , server = server
       , error = Nothing
       , state = PortFunnels.initialState
+      , isLoaded = False
       }
-    , openSocket server
+    , Cmd.none
     )
 
 
@@ -132,8 +134,17 @@ cmdPort =
 socketHandler : Response -> State -> Model -> ( Model, Cmd Msg )
 socketHandler response state mdl =
     let
+        wasLoaded =
+            WebSocket.isLoaded mdl.state.websocket
+
+        isLoaded =
+            WebSocket.isLoaded state.websocket
+
         model =
-            { mdl | state = state }
+            { mdl
+                | state = state
+                , isLoaded = isLoaded
+            }
     in
     case response of
         WebSocket.MessageReceivedResponse { message } ->
@@ -150,7 +161,13 @@ socketHandler response state mdl =
             )
 
         _ ->
-            ( model, Cmd.none )
+            ( model
+            , if isLoaded && not wasLoaded then
+                openSocket model.server
+
+              else
+                Cmd.none
+            )
 
 
 

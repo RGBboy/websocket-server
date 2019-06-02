@@ -54,13 +54,19 @@ function Message (id, location, message) {
 
 
 
-function handleConnection (input, output, ws) {
+var lastMessage = null;
+var lastId = null;
+
+function handleConnection (input, output, verbose, ws) {
 
   const id = uuid();
   const requestUrl = 'ws://' + ws.upgradeReq.headers.host + ws.upgradeReq.url;
   const location = Location(requestUrl);
 
+  if (verbose) console.log('connected:', id);
+
   function recieve (message) {
+    if (verbose) console.log('receive:', message, '\n  from:', id);
     input.send(Message(id, location, message));
   };
 
@@ -68,12 +74,23 @@ function handleConnection (input, output, ws) {
     switch (command.type) {
       case 'Close':
         if (command.id === id) {
+          if (verbose) console.log('close:', id);
+          lastMessage = null;
           ws.close();
         };
         return;
       case 'Message':
         if (command.id === id) {
           try {
+            if (verbose)  {
+              if (lastMessage == command.message && lastId != id) {
+                console.log('  to:', id);
+              } else {
+                lastMessage = command.message;
+                lastId = id;
+                console.log('send:', lastMessage, '\n  to:', id);
+              }
+            }
             ws.send(command.message);
           } catch (_) {}
         };
@@ -103,9 +120,9 @@ function handleConnection (input, output, ws) {
 
 
 
-function WebSocketServer (server, inputPort, outputPort) {
+function WebSocketServer (server, inputPort, outputPort, verbose) {
   const wss = new WSS({ server: server });
-  wss.on('connection', handleConnection.bind(null, inputPort, outputPort));
+  wss.on('connection', handleConnection.bind(null, inputPort, outputPort, verbose));
   return wss;
 };
 

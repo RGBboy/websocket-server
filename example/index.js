@@ -1,4 +1,5 @@
 var port = (process.env.PORT || 8080),
+    verbose = (process.env.VERBOSE || null),
     http = require('http'),
     ecstatic = require('ecstatic'),
     server = http.createServer(
@@ -9,7 +10,8 @@ var port = (process.env.PORT || 8080),
     wss = new WebSocketServer(
       server,
       app.ports.inputPort,
-      app.ports.outputPort
+      app.ports.outputPort,
+      verbose
     );
 
 server.listen(port);
