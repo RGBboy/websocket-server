@@ -4,8 +4,8 @@ var port = (process.env.PORT || 8080),
     server = http.createServer(
       ecstatic({ root: __dirname })
     ),
-    WebSocketServer = require('../'),
-    app = require('./server.js').Server.worker(),
+    WebSocketServer = require('./WebSocketServer.js'),
+    app = require('./server.js').Elm.Server.init(),
     wss = new WebSocketServer(
       server,
       app.ports.inputPort,
@@ -13,5 +13,4 @@ var port = (process.env.PORT || 8080),
     );
 
 server.listen(port);
-
 console.log(`Listening on :${port}`);
