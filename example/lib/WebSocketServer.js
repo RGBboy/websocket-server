@@ -106,6 +106,7 @@ function handleConnection (input, output, verbose, ws) {
     ws.removeListener('message', recieve);
     ws.removeListener('close', close);
     ws.removeListener('error', close);
+    if (verbose) console.log('disconnected:', id);
   }
 
   ws.on('message', recieve);
