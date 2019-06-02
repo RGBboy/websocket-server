@@ -9,9 +9,9 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node ./",
-    "build:server": "elm make Server.elm --output server.js",
-    "build:client": "elm make Client.elm --output client.js",
+    "start": "node ./index.js",
+    "build:server": "elm make src/Server.elm --output server.js",
+    "build:client": "elm make src/Client.elm --output client.js",
     "build": "npm run build:client && npm run build:server",
     "test": "elm-test src/WebSocketServerTest.elm"
   },

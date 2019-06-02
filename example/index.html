@@ -5,15 +5,19 @@
   <title>Web Socket Server Example</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>html { width:100%; height: 100%; }</style>
+  <script type='text/javascript' src='js/PortFunnel.js'></script>
+  <script type='text/javascript' src='js/PortFunnel/WebSocket.js'></script>
 </head>
 <body>
   <div id="mount"></div>
   <script src="client.js"></script>
   <script>
-    Elm.Client.embed(
-      document.getElementById('mount'),
-      window.location.href.replace('http', 'ws')
+    var app = Elm.Client.init(
+      { node: document.getElementById('mount'),
+        flags: window.location.href.replace('http', 'ws')
+      }
     );
+    PortFunnel.subscribe(app)
   </script>
 </body>
 </html>
