@@ -1,0 +1,48 @@
+INFO: Found elm at /usr/local/bin/elm
+INFO: Found elm 0.19.0
+INFO: Found elm-format at /usr/local/bin/elm-format
+INFO: Found elm-format 0.8.1
+INFO: Cleaning ./elm-stuff before upgrading
+INFO: Converting elm-package.json -> elm.json
+INFO: Detected a package project (this project has exposed modules)
+INFO: Switching from NoRedInk/elm-decode-pipeline (deprecated) to NoRedInk/elm-json-decode-pipeline
+INFO: Installing latest version of NoRedInk/elm-json-decode-pipeline
+INFO: Switching from elm-lang/core (deprecated) to elm/core
+INFO: Installing latest version of elm/core
+INFO: Detected use of elm-lang/core#Json.Decode; installing elm/json
+INFO: Switching from elm-lang/html (deprecated) to elm/html
+INFO: Installing latest version of elm/html
+INFO: Switching from elm-lang/navigation (deprecated) to elm/browser
+INFO: Installing latest version of elm/browser
+INFO: Switching from elm-lang/navigation (deprecated) to elm/url
+INFO: Installing latest version of elm/url
+WARNING: elm-lang/websocket has not been upgraded to 0.19 yet!
+INFO: Upgrading *.elm files in src/
+
+
+SUCCESS! Your project's dependencies and code have been upgraded.
+However, your project may not yet compile due to API changes in your
+dependencies.
+
+See <https://github.com/elm/compiler/blob/master/upgrade-docs/0.19.md>
+and the documentation for your dependencies for more information.
+
+WARNING! 1 of your dependencies have not yet been upgraded to
+support Elm 0.19.
+  - https://github.com/elm-lang/websocket
+
+Here are some common upgrade steps that you will need to do manually:
+
+- NoRedInk/elm-json-decode-pipeline
+  - [ ] Changes uses of Json.Decode.Pipeline.decode to Json.Decode.succeed
+- elm/core
+  - [ ] Replace uses of toString with String.fromInt, String.fromFloat, or Debug.toString as appropriate
+- elm/html
+  - [ ] If you used Html.program*, install elm/browser and switch to Browser.element or Browser.document
+  - [ ] If you used Html.beginnerProgram, install elm/browser and switch Browser.sandbox
+- elm/browser
+  - [ ] Change code using Navigation.program* to use Browser.application
+  - [ ] Use the Browser.Key passed to your init function in any calls to Browser.Navigation.pushUrl/replaceUrl/back/forward
+- elm/url
+  - [ ] Changes uses of Navigation.Location to Url.Url
+

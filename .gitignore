@@ -1,5 +1,6 @@
 documentation.json
+docs.json
 elm-stuff
 example/client.js
 example/server.js
-node_modules
+example/node_modules

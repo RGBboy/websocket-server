@@ -9,14 +9,14 @@
   },
   "main": "index.js",
   "scripts": {
-    "start:example": "node ./example",
-    "build:example:server": "elm-make ./example/Server.elm --output ./example/server.js",
-    "build:example:client": "elm-make ./example/Client.elm --output ./example/client.js",
-    "build:example": "npm run build:example:client && npm run build:example:server",
+    "start": "node ./index.js",
+    "build:server": "elm make src/Server.elm --output server.js",
+    "build:client": "elm make src/Client.elm --output client.js",
+    "build": "npm run build:client && npm run build:server",
     "test": "elm-test src/WebSocketServerTest.elm"
   },
   "files": [
-    "index.js",
+    "package.js",
     "lib/WebSocketServer.js"
   ],
   "dependencies": {
@@ -25,8 +25,8 @@
   },
   "devDependencies": {
     "ecstatic": "^2.1.0",
-    "elm": "^0.18.0",
-    "elm-test": "^0.18.2"
+    "elm": "^0.19.0",
+    "elm-test": "^0.19.0"
   },
   "license": "BSD-3-Clause"
 }
