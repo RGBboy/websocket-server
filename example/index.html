@@ -10,10 +10,27 @@
   <div id="mount"></div>
   <script src="client.js"></script>
   <script>
-    Elm.Client.embed(
-      document.getElementById('mount'),
-      window.location.href.replace('http', 'ws')
-    );
+    // Start the Elm application.
+    var app = Elm.Client.init({
+      node: document.getElementById('mount')
+    });
+
+    // Create your WebSocket.
+    var socket = new WebSocket(window.location.href.replace('http', 'ws'));
+
+    // When a command goes to the `send` port, we pass the message along
+    // to the WebSocket.
+    app.ports.send.subscribe(function(message) {
+        console.log("send", message)
+        socket.send(message);
+    });
+
+    // When a message comes into our WebSocket, we pass the message along
+    // to the `receive` port.
+    socket.addEventListener("message", function(event) {
+      console.log("receive", event.data)
+      app.ports.receive.send(event.data);
+    });
   </script>
 </body>
 </html>

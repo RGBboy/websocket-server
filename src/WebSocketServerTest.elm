@@ -1,69 +1,41 @@
-port module WebSocketServerTest exposing (main)
+module WebSocketServerTest exposing (tests)
 
 import Test exposing (Test, describe, test)
 import Test.Runner.Node exposing (run, TestProgram)
 import Expect
-import String
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Navigation
+import Url exposing (Url)
 
 import WebSocketServer exposing (..)
 
 
 
-main : TestProgram
-main =
-  run emit tests
-
-port emit : ( String, Encode.Value ) -> Cmd msg
-
-
-
-location : Location
-location = (Navigation.Location "ws://localhost:8080/123" "localhost:8080" "localhost" "ws:" "ws://localhost:8080" "8080" "/123" "" "" "" "")
+url : Url
+url = 
+  { protocol = Url.Http
+  , host = "localhost"
+  , port_ = Just 8080
+  , path = "/123"
+  , query = Nothing
+  , fragment = Nothing
+  }
 
 connectionJSON : String
 connectionJSON = """
 {
   "type": "Connection",
   "id": "abc",
-  "location": {
-    "protocol": "ws:",
-    "hash": "",
-    "search": "",
-    "pathname": "/123",
-    "port_": "8080",
-    "hostname": "localhost",
-    "host": "localhost:8080",
-    "origin": "ws://localhost:8080",
-    "href": "ws://localhost:8080/123",
-    "username" : "",
-    "password" : ""
-  }
+  "url": "http://localhost:8080/123"
 }
 """
-
-
 
 disconnectionJSON : String
 disconnectionJSON = """
 {
   "type": "Disconnection",
   "id": "abc",
-  "location": {
-    "protocol": "ws:",
-    "hash": "",
-    "search": "",
-    "pathname": "/123",
-    "port_": "8080",
-    "hostname": "localhost",
-    "host": "localhost:8080",
-    "origin": "ws://localhost:8080",
-    "href": "ws://localhost:8080/123",
-    "username" : "",
-    "password" : ""
-  }
+  "url": "http://localhost:8080/123"
 }
 """
 
@@ -72,28 +44,15 @@ messageJSON = """
 {
   "type": "Message",
   "id": "abc",
-  "location": {
-    "protocol": "ws:",
-    "hash": "",
-    "search": "",
-    "pathname": "/123",
-    "port_": "8080",
-    "hostname": "localhost",
-    "host": "localhost:8080",
-    "origin": "ws://localhost:8080",
-    "href": "ws://localhost:8080/123",
-    "username" : "",
-    "password" : ""
-  },
+  "url": "http://localhost:8080/123",
   "message": "Test"
 }
 """
 
-
 type Msg
-  = Connection Socket Location
-  | Disconnection Socket Location
-  | Message Socket Location String
+  = Connection Socket Url
+  | Disconnection Socket Url
+  | Message Socket Url String
 
 config =
   { onConnection = Connection
@@ -113,15 +72,15 @@ tests =
       [ test "decodes Connection events" <|
         \() ->
           expectDecode (eventDecoder config) connectionJSON
-            (flip Expect.equal (Connection "abc" location))
+            (Expect.equal (Connection "abc" url))
       , test "decodes Disconnection events" <|
         \() ->
           expectDecode (eventDecoder config) disconnectionJSON
-            (flip Expect.equal (Disconnection "abc" location))
+            (Expect.equal (Disconnection "abc" url))
       , test "decodes Message events" <|
         \() ->
           expectDecode (eventDecoder config) messageJSON
-            (flip Expect.equal (Message "abc" location "Test"))
+            (Expect.equal (Message "abc" url "Test"))
       ]
     , describe ".close"
       [ test "close" <|

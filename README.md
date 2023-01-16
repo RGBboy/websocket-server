@@ -42,10 +42,10 @@ import WebSocketServer as WSS exposing (Socket, sendToOne, sendToMany)
 
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-  Platform.program
-    { init = ([], Cmd.none)
+  Platform.worker
+    { init = always ([], Cmd.none)
     , update = update
     , subscriptions = subscriptions
     }
@@ -78,9 +78,9 @@ update message model =
       ( List.filter ((/=) socket) model
       , Cmd.none
       )
-    Message message ->
+    Message clientMessage ->
       ( model
-      , WSS.sendToMany outputPort message model
+      , WSS.sendToMany outputPort clientMessage model
           |> Cmd.batch
       )
     Noop -> (model, Cmd.none)
@@ -111,7 +111,7 @@ The node API for this is quite simple:
 var port = (process.env.PORT || 8080),
     server = require('http').createServer(),
     WebSocketServer = require('elm-websocket-server'),
-    app = require('./my-elm-server.js').Main.worker(),
+    app = require('./my-elm-server.js').Elm.Server.init(),
     wss = new WebSocketServer(
       server,
       app.ports.inputPort,
@@ -129,4 +129,4 @@ Run `npm install` then `elm package install`.
 
 ## Tests
 
-Run `npm t`.
+Run `npm test`.

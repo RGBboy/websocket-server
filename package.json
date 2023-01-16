@@ -1,6 +1,6 @@
 {
   "name": "elm-websocket-server",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Web Socket Server in Elm and Node.js",
   "author": "RGBboy",
   "repository": {
@@ -10,8 +10,8 @@
   "main": "index.js",
   "scripts": {
     "start:example": "node ./example",
-    "build:example:server": "elm-make ./example/Server.elm --output ./example/server.js",
-    "build:example:client": "elm-make ./example/Client.elm --output ./example/client.js",
+    "build:example:server": "cd example && elm make ./Server.elm --output ./server.js",
+    "build:example:client": "cd example && elm make ./Client.elm --output ./client.js",
     "build:example": "npm run build:example:client && npm run build:example:server",
     "test": "elm-test src/WebSocketServerTest.elm"
   },
@@ -21,12 +21,13 @@
   ],
   "dependencies": {
     "uuid": "^3.0.1",
-    "ws": "^2.2.2"
+    "ws": "^8.12.0"
   },
   "devDependencies": {
-    "ecstatic": "^2.1.0",
-    "elm": "^0.18.0",
-    "elm-test": "^0.18.2"
+    "ecstatic": "^4.1.4",
+    "elm": "^0.19.1-5",
+    "elm-format": "^0.8.5",
+    "elm-test": "^0.19.1-revision11"
   },
   "license": "BSD-3-Clause"
 }

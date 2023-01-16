@@ -1,17 +1,18 @@
-module Client exposing (..)
+port module Client exposing (..)
 
+import Browser
 import Html as H exposing (Html)
 import Html.Attributes as A
 import Html.Events as E
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import WebSocket
+import Result
 
 
 
-main : Program String Model Msg
+main : Program () Model Msg
 main =
-  H.programWithFlags
+  Browser.element
     { init = init
     , view = view
     , update = update
@@ -20,19 +21,24 @@ main =
 
 
 
+-- PORTS
+
+port receive : (Decode.Value -> msg) -> Sub msg
+port send : Encode.Value -> Cmd msg
+
+
+
 -- MODEL
 
 type alias Model =
   { messages: List String
   , input: String
-  , server: String
   }
 
-init : String -> (Model, Cmd msg)
-init server =
+init : () -> (Model, Cmd msg)
+init _ =
   ( { messages = []
     , input = ""
-    , server = server
     }
   , Cmd.none
   )
@@ -45,6 +51,7 @@ type Msg
   = InputMessage String
   | SubmitMessage
   | ServerMessage String
+  | ServerError
 
 update : Msg -> Model -> (Model, Cmd msg)
 update message model =
@@ -55,22 +62,34 @@ update message model =
       )
     SubmitMessage ->
       ( { model | input = "" }
-      , WebSocket.send model.server model.input
+      , Encode.string model.input |> send
       )
-    ServerMessage message ->
+    ServerMessage serverMessage ->
       ( { model
-        | messages = message :: model.messages
+        | messages = serverMessage :: model.messages
         }
       , Cmd.none
       )
+    ServerError ->
+      ( model, Cmd.none )
 
 
 
 -- SUBSCRIPTIONS
 
+msgDecoder : Decoder Msg
+msgDecoder =
+  Decode.map ServerMessage Decode.string
+
+decodeMsg : Decode.Value -> Msg
+decodeMsg value =
+  Decode.decodeValue msgDecoder value
+    |> Result.withDefault ServerError
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  WebSocket.listen model.server ServerMessage
+  receive decodeMsg
+
 
 
 

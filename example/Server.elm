@@ -7,10 +7,10 @@ import WebSocketServer as WSS exposing (Socket, sendToOne, sendToMany)
 
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-  Platform.program
-    { init = ([], Cmd.none)
+  Platform.worker
+    { init = always ([], Cmd.none)
     , update = update
     , subscriptions = subscriptions
     }
@@ -43,9 +43,9 @@ update message model =
       ( List.filter ((/=) socket) model
       , Cmd.none
       )
-    Message message ->
+    Message clientMessage ->
       ( model
-      , WSS.sendToMany outputPort message model
+      , WSS.sendToMany outputPort clientMessage model
           |> Cmd.batch
       )
     Noop -> (model, Cmd.none)

@@ -1,6 +1,5 @@
 module WebSocketServer exposing
   ( Socket
-  , Location
   , close
   , sendToOne
   , sendToMany
@@ -12,15 +11,15 @@ module WebSocketServer exposing
 application in Elm.
 
 # Web Socket Server
-@docs Socket, Location, eventDecoder
+@docs Socket, eventDecoder
 # Commands
 @docs sendToOne, sendToMany, sendToOthers, close
 -}
 
 import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import Navigation
+import Url exposing (Url)
 
 
 
@@ -28,12 +27,6 @@ import Navigation
 are unique to each connection that is created.
 -}
 type alias Socket = String
-
-{-| The same Location type as found in [`elm-lang/navigation`][navigation].
-
-[navigation]: https://github.com/elm-lang/navigation
--}
-type alias Location = Navigation.Location
 
 
 
@@ -48,7 +41,9 @@ You would write something like this to create a cmd to send a message:
     sendToOne outputPort "Hello!" socketA
 -}
 sendToOne : (Encode.Value -> a) -> String -> Socket -> a
-sendToOne outputPort = curry (encodeMessage >> outputPort)
+sendToOne outputPort message socket =
+  encodeMessage message socket
+    |> outputPort
 
 {-| Send a message to a many sockets. Given you have an output port:
 
@@ -63,7 +58,7 @@ sendToMany : (Encode.Value -> a) -> String -> List Socket -> List a
 sendToMany outputPort message sockets =
   List.map (sendToOne outputPort message) sockets
 
-{-| Send a message to a all sockets except one. Given you have an output port:
+{-| Send a message to all sockets except one. Given you have an output port:
 
     port outputPort : Encode.Value -> Cmd msg
 
@@ -101,8 +96,8 @@ encodeClose socket =
     , ("id", Encode.string socket)
     ]
 
-encodeMessage : (String, Socket) -> Encode.Value
-encodeMessage (message, socket) =
+encodeMessage : String -> Socket -> Encode.Value
+encodeMessage message socket =
   Encode.object
     [ ("type", Encode.string "Message")
     , ("id", Encode.string socket)
@@ -117,31 +112,31 @@ encodeMessage (message, socket) =
 the events that will be triggered over a sockets lifetime and respond to them
 in your update function.
 
-    onConnection : Socket -> Location -> msg
+    onConnection : Socket -> Url -> msg
 
 Triggered when a new connection is made. Can be used to get the new connection
-and the Location that the connection was made to. This can be useful to
-segregate connections into groups or associating a private id.
+and the Url that the connection was made to. This can be useful to segregate 
+connections into groups or associating a private id.
 
-    onDisconnection : Socket -> Location -> msg
+    onDisconnection : Socket -> Url -> msg
 
 Triggered when a disconnection happens. Can be used to clean up the connection
 from anywhere it has been saved in your application state.
 
-    onMessage : Socket -> Location -> String -> msg
+    onMessage : Socket -> Url -> String -> msg
 
 Triggered when a socket recieves a message.
 
 **Note 1:** Almost everyone will want to use a URL parsing library like
-[`evancz/url-parser`][parse] to turn a `Location` into something more useful.
+[`elm/url`][parse] to turn a `Url` into something more useful.
 
-[parse]: https://github.com/evancz/url-parser
+[parse]: https://github.com/elm/url
 
 -}
 eventDecoder
-  : { onConnection : Socket -> Location -> msg
-    , onDisconnection: Socket -> Location -> msg
-    , onMessage: Socket -> Location -> String -> msg
+  : { onConnection : Socket -> Url -> msg
+    , onDisconnection: Socket -> Url -> msg
+    , onMessage: Socket -> Url -> String -> msg
     }
   -> Decoder msg
 eventDecoder config =
@@ -149,40 +144,33 @@ eventDecoder config =
     |> Decode.andThen (msgTypeDecoder config)
 
 msgTypeDecoder
-  : { onConnection : Socket -> Location -> msg
-    , onDisconnection: Socket -> Location -> msg
-    , onMessage: Socket -> Location -> String -> msg
+  : { onConnection : Socket -> Url -> msg
+    , onDisconnection: Socket -> Url -> msg
+    , onMessage: Socket -> Url -> String -> msg
     }
   -> String
   -> Decoder msg
 msgTypeDecoder config kind =
   case kind of
     "Connection" ->
-      decode config.onConnection
+      Decode.succeed config.onConnection
         |> required "id" Decode.string
-        |> required "location" decodeLocation
+        |> required "url" decodeUrl
     "Disconnection" ->
-      decode config.onDisconnection
+      Decode.succeed config.onDisconnection
         |> required "id" Decode.string
-        |> required "location" decodeLocation
+        |> required "url" decodeUrl
     "Message" ->
-      decode config.onMessage
+      Decode.succeed config.onMessage
         |> required "id" Decode.string
-        |> required "location" decodeLocation
+        |> required "url" decodeUrl
         |> required "message" Decode.string
     _ -> Decode.fail ("Could not decode msg of type " ++ kind)
 
-decodeLocation : Decoder Location
-decodeLocation =
-  decode Navigation.Location
-    |> required "href" Decode.string
-    |> required "host" Decode.string
-    |> required "hostname" Decode.string
-    |> required "protocol" Decode.string
-    |> required "origin" Decode.string
-    |> required "port_" Decode.string
-    |> required "pathname" Decode.string
-    |> required "search" Decode.string
-    |> required "hash" Decode.string
-    |> required "username" Decode.string
-    |> required "password" Decode.string
+decodeUrl : Decoder Url
+decodeUrl =
+    Decode.string
+      |> Decode.map Url.fromString
+      |> Decode.map (Maybe.map Decode.succeed)
+      |> Decode.map (Maybe.withDefault (Decode.fail "Could not decode url"))
+      |> Decode.andThen identity
