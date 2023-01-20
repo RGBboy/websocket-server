@@ -36,7 +36,7 @@ Then go to localhost:8080 in multiple browser windows.
 port module Server exposing (..)
 
 import Platform exposing (Program)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode
 import Json.Encode as Encode
 import WebSocketServer as WSS exposing (Socket, sendToOne, sendToMany)
 
@@ -64,7 +64,7 @@ type alias Model = List WSS.Socket
 type Msg
   = Connection WSS.Socket
   | Disconnection WSS.Socket
-  | Message String
+  | Message Encode.Value
   | Noop
 
 update : Msg -> Model -> (Model, Cmd msg)

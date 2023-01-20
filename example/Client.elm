@@ -92,7 +92,6 @@ subscriptions model =
 
 
 
-
 -- VIEW
 
 onEnter : Msg -> H.Attribute Msg

@@ -1,7 +1,7 @@
 port module Server exposing (..)
 
 import Platform exposing (Program)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode
 import Json.Encode as Encode
 import WebSocketServer as WSS exposing (Socket, sendToOne, sendToMany)
 
@@ -29,7 +29,7 @@ type alias Model = List WSS.Socket
 type Msg
   = Connection WSS.Socket
   | Disconnection WSS.Socket
-  | Message String
+  | Message Encode.Value
   | Noop
 
 update : Msg -> Model -> (Model, Cmd msg)
@@ -44,10 +44,14 @@ update message model =
       , Cmd.none
       )
     Message clientMessage ->
-      ( model
-      , WSS.sendToMany outputPort clientMessage model
-          |> Cmd.batch
-      )
+      let
+        decodedMessage = Decode.decodeValue Decode.string clientMessage
+          |> Debug.log "Message Value"
+      in
+        ( model
+        , WSS.sendToMany outputPort clientMessage model
+            |> Cmd.batch
+        )
     Noop -> (model, Cmd.none)
 
 -- SUBSCRIPTIONS

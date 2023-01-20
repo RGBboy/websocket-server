@@ -1,7 +1,6 @@
 module WebSocketServerTest exposing (tests)
 
 import Test exposing (Test, describe, test)
-import Test.Runner.Node exposing (run, TestProgram)
 import Expect
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -52,7 +51,7 @@ messageJSON = """
 type Msg
   = Connection Socket Url
   | Disconnection Socket Url
-  | Message Socket Url String
+  | Message Socket Url Encode.Value
 
 config =
   { onConnection = Connection
@@ -80,7 +79,7 @@ tests =
       , test "decodes Message events" <|
         \() ->
           expectDecode (eventDecoder config) messageJSON
-            (Expect.equal (Message "abc" url "Test"))
+            (Expect.equal (Message "abc" url (Encode.string "Test")))
       ]
     , describe ".close"
       [ test "close" <|
@@ -98,7 +97,7 @@ tests =
       [ test "sendToOne" <|
         \() ->
           let
-            actual = Encode.encode 2 (sendToOne identity "Test" "a")
+            actual = Encode.encode 2 (sendToOne identity (Encode.string "Test") "a")
             expected = """{
   "type": "Message",
   "id": "a",
@@ -111,7 +110,7 @@ tests =
       [ test "sendToMany" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToMany identity "Test" ["a", "b"])
+            actual = List.map (Encode.encode 2) (sendToMany identity (Encode.string "Test") ["a", "b"])
             expected =
               ["""{
   "type": "Message",
@@ -131,7 +130,7 @@ tests =
       [ test "sendToOthers" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToOthers identity "Test" "a" ["a", "b", "c"])
+            actual = List.map (Encode.encode 2) (sendToOthers identity (Encode.string "Test") "a" ["a", "b", "c"])
             expected =
               ["""{
   "type": "Message",
