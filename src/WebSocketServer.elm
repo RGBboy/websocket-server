@@ -1,5 +1,6 @@
 module WebSocketServer exposing
   ( Socket
+  , socketToString
   , close
   , sendToOne
   , sendToMany
@@ -11,7 +12,7 @@ module WebSocketServer exposing
 application in Elm.
 
 # Web Socket Server
-@docs Socket, eventDecoder
+@docs Socket, socketToString, eventDecoder
 # Commands
 @docs sendToOne, sendToMany, sendToOthers, close
 -}
@@ -20,13 +21,20 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
 import Url exposing (Url)
+import Internal
 
 
 
 {-| A pointer to the socket in the node.js world. These are based on uuids and
 are unique to each connection that is created.
 -}
-type alias Socket = String
+type alias Socket = Internal.Socket
+
+{-| Transform a Socket into a `String`. Useful if you want to use the value
+as a key in a Dict.
+-}
+socketToString : Socket -> String
+socketToString = Internal.socketToString
 
 
 
@@ -93,14 +101,14 @@ encodeClose : Socket -> Encode.Value
 encodeClose socket =
   Encode.object
     [ ("type", Encode.string "Close")
-    , ("id", Encode.string socket)
+    , ("id", Internal.encodeSocket socket)
     ]
 
 encodeMessage : Encode.Value -> Socket -> Encode.Value
 encodeMessage message socket =
   Encode.object
     [ ("type", Encode.string "Message")
-    , ("id", Encode.string socket)
+    , ("id", Internal.encodeSocket socket)
     , ("message", message)
     ]
 
@@ -127,7 +135,7 @@ from anywhere it has been saved in your application state.
 
 Triggered when a socket recieves a message.
 
-**Note 1:** Almost everyone will want to use a URL parsing library like
+**Note:** Almost everyone will want to use a URL parsing library like
 [`elm/url`][parse] to turn a `Url` into something more useful.
 
 [parse]: https://github.com/elm/url
@@ -154,15 +162,15 @@ msgTypeDecoder config kind =
   case kind of
     "Connection" ->
       Decode.succeed config.onConnection
-        |> required "id" Decode.string
+        |> required "id" Internal.decodeSocket
         |> required "url" decodeUrl
     "Disconnection" ->
       Decode.succeed config.onDisconnection
-        |> required "id" Decode.string
+        |> required "id" Internal.decodeSocket
         |> required "url" decodeUrl
     "Message" ->
       Decode.succeed config.onMessage
-        |> required "id" Decode.string
+        |> required "id" Internal.decodeSocket
         |> required "url" decodeUrl
         |> required "message" Decode.value
     _ -> Decode.fail ("Could not decode msg of type " ++ kind)

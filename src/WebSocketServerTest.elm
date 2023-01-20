@@ -6,8 +6,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Url exposing (Url)
 
+import Internal
 import WebSocketServer exposing (..)
-
 
 
 url : Url
@@ -48,6 +48,15 @@ messageJSON = """
 }
 """
 
+testSocketId : String
+testSocketId = "abc"
+
+testSocket : Socket
+testSocket = Internal.socket testSocketId
+
+testMessage : Encode.Value
+testMessage = Encode.string "Test"
+
 type Msg
   = Connection Socket Url
   | Disconnection Socket Url
@@ -71,21 +80,21 @@ tests =
       [ test "decodes Connection events" <|
         \() ->
           expectDecode (eventDecoder config) connectionJSON
-            (Expect.equal (Connection "abc" url))
+            (Expect.equal (Connection testSocket url))
       , test "decodes Disconnection events" <|
         \() ->
           expectDecode (eventDecoder config) disconnectionJSON
-            (Expect.equal (Disconnection "abc" url))
+            (Expect.equal (Disconnection testSocket url))
       , test "decodes Message events" <|
         \() ->
           expectDecode (eventDecoder config) messageJSON
-            (Expect.equal (Message "abc" url (Encode.string "Test")))
+            (Expect.equal (Message testSocket url testMessage))
       ]
     , describe ".close"
       [ test "close" <|
         \() ->
           let
-            actual = Encode.encode 2 (close identity "a")
+            actual = Encode.encode 2 (close identity (Internal.socket "a"))
             expected = """{
   "type": "Close",
   "id": "a"
@@ -97,7 +106,8 @@ tests =
       [ test "sendToOne" <|
         \() ->
           let
-            actual = Encode.encode 2 (sendToOne identity (Encode.string "Test") "a")
+            socket = Internal.socket "a" 
+            actual = Encode.encode 2 (sendToOne identity testMessage socket)
             expected = """{
   "type": "Message",
   "id": "a",
@@ -110,7 +120,9 @@ tests =
       [ test "sendToMany" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToMany identity (Encode.string "Test") ["a", "b"])
+            sockets = ["a", "b"]
+              |> List.map Internal.socket
+            actual = List.map (Encode.encode 2) (sendToMany identity testMessage sockets)
             expected =
               ["""{
   "type": "Message",
@@ -130,7 +142,10 @@ tests =
       [ test "sendToOthers" <|
         \() ->
           let
-            actual = List.map (Encode.encode 2) (sendToOthers identity (Encode.string "Test") "a" ["a", "b", "c"])
+            allSockets = ["a", "b", "c"]
+              |> List.map Internal.socket
+            socket = Internal.socket "a"
+            actual = List.map (Encode.encode 2) (sendToOthers identity testMessage socket allSockets)
             expected =
               ["""{
   "type": "Message",
@@ -145,5 +160,5 @@ tests =
               ]
           in
             Expect.equalLists actual expected
-      ]
     ]
+  ]
