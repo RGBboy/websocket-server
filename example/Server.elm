@@ -29,7 +29,7 @@ type alias Model = List WSS.Socket
 type Msg
   = Connection WSS.Socket
   | Disconnection WSS.Socket
-  | Message Encode.Value
+  | Message String
   | Noop
 
 update : Msg -> Model -> (Model, Cmd msg)
@@ -44,14 +44,10 @@ update message model =
       , Cmd.none
       )
     Message clientMessage ->
-      let
-        decodedMessage = Decode.decodeValue Decode.string clientMessage
-          |> Debug.log "Message Value"
-      in
-        ( model
-        , WSS.sendToMany outputPort clientMessage model
-            |> Cmd.batch
-        )
+      ( model
+      , WSS.sendToMany outputPort clientMessage model
+          |> Cmd.batch
+      )
     Noop -> (model, Cmd.none)
 
 -- SUBSCRIPTIONS

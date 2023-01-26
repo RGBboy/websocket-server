@@ -64,7 +64,7 @@ type alias Model = List WSS.Socket
 type Msg
   = Connection WSS.Socket
   | Disconnection WSS.Socket
-  | Message Encode.Value
+  | Message String
   | Noop
 
 update : Msg -> Model -> (Model, Cmd msg)

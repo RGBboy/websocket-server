@@ -46,9 +46,9 @@ socketToString = Internal.socketToString
 
 You would write something like this to create a cmd to send a message:
 
-    sendToOne outputPort (Encode.string "Hello!") socketA
+    sendToOne outputPort "Hello!" socketA
 -}
-sendToOne : (Encode.Value -> a) -> Encode.Value -> Socket -> a
+sendToOne : (Encode.Value -> a) -> String -> Socket -> a
 sendToOne outputPort message socket =
   encodeMessage message socket
     |> outputPort
@@ -59,10 +59,10 @@ sendToOne outputPort message socket =
 
 You would write something like this to create a cmd to send messages:
 
-    sendToMany outputPort (Encode.string "Hello!") [socketA, socketB]
+    sendToMany outputPort "Hello!" [socketA, socketB]
       |> Cmd.batch
 -}
-sendToMany : (Encode.Value -> a) -> Encode.Value -> List Socket -> List a
+sendToMany : (Encode.Value -> a) -> String -> List Socket -> List a
 sendToMany outputPort message sockets =
   List.map (sendToOne outputPort message) sockets
 
@@ -72,10 +72,10 @@ sendToMany outputPort message sockets =
 
 You would write something like this to create a cmd to send messages:
 
-    sendToOthers outputPort (Encode.string "Hello!") socketA [socketA, socketB, socketC]
+    sendToOthers outputPort "Hello!" socketA [socketA, socketB, socketC]
       |> Cmd.batch
 -}
-sendToOthers : (Encode.Value -> a) -> Encode.Value -> Socket -> List Socket -> List a
+sendToOthers : (Encode.Value -> a) -> String -> Socket -> List Socket -> List a
 sendToOthers outputPort message socket sockets =
   let
     others = List.filter ((/=) socket) sockets
@@ -104,12 +104,12 @@ encodeClose socket =
     , ("id", Internal.encodeSocket socket)
     ]
 
-encodeMessage : Encode.Value -> Socket -> Encode.Value
+encodeMessage : String -> Socket -> Encode.Value
 encodeMessage message socket =
   Encode.object
     [ ("type", Encode.string "Message")
     , ("id", Internal.encodeSocket socket)
-    , ("message", message)
+    , ("message", Encode.string message)
     ]
 
 
@@ -131,7 +131,7 @@ connections into groups or associating a private id.
 Triggered when a disconnection happens. Can be used to clean up the connection
 from anywhere it has been saved in your application state.
 
-    onMessage : Socket -> Url -> Decode.Value -> msg
+    onMessage : Socket -> Url -> String -> msg
 
 Triggered when a socket recieves a message.
 
@@ -144,7 +144,7 @@ Triggered when a socket recieves a message.
 eventDecoder
   : { onConnection : Socket -> Url -> msg
     , onDisconnection: Socket -> Url -> msg
-    , onMessage: Socket -> Url -> Decode.Value -> msg
+    , onMessage: Socket -> Url -> String -> msg
     }
   -> Decoder msg
 eventDecoder config =
@@ -154,7 +154,7 @@ eventDecoder config =
 msgTypeDecoder
   : { onConnection : Socket -> Url -> msg
     , onDisconnection: Socket -> Url -> msg
-    , onMessage: Socket -> Url -> Decode.Value -> msg
+    , onMessage: Socket -> Url -> String -> msg
     }
   -> String
   -> Decoder msg
@@ -172,7 +172,7 @@ msgTypeDecoder config kind =
       Decode.succeed config.onMessage
         |> required "id" Internal.decodeSocket
         |> required "url" decodeUrl
-        |> required "message" Decode.value
+        |> required "message" Decode.string
     _ -> Decode.fail ("Could not decode msg of type " ++ kind)
 
 decodeUrl : Decoder Url

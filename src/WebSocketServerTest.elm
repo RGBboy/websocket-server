@@ -54,13 +54,13 @@ testSocketId = "abc"
 testSocket : Socket
 testSocket = Internal.socket testSocketId
 
-testMessage : Encode.Value
-testMessage = Encode.string "Test"
+testMessage : String
+testMessage = "Test"
 
 type Msg
   = Connection Socket Url
   | Disconnection Socket Url
-  | Message Socket Url Encode.Value
+  | Message Socket Url String
 
 config =
   { onConnection = Connection
