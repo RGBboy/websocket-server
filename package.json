@@ -1,6 +1,6 @@
 {
   "name": "elm-websocket-server",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Web Socket Server in Elm and Node.js",
   "author": "RGBboy",
   "repository": {
